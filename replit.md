@@ -1,36 +1,45 @@
-# [Project name]
+# Pakistan Loan Assistance Programme
 
-_Replace the heading above with the project's name, and this line with one sentence describing what this app does for users._
+A Government of Pakistan Loan Assistance Programme web app with splash screen, landing page, and 4-step loan application form.
 
 ## Run & Operate
 
+- `pnpm --filter @workspace/loan-app run dev` — run the frontend (port auto-assigned)
 - `pnpm --filter @workspace/api-server run dev` — run the API server (port 5000)
 - `pnpm run typecheck` — full typecheck across all packages
 - `pnpm run build` — typecheck + build all packages
-- `pnpm --filter @workspace/api-spec run codegen` — regenerate API hooks and Zod schemas from the OpenAPI spec
-- `pnpm --filter @workspace/db run push` — push DB schema changes (dev only)
-- Required env: `DATABASE_URL` — Postgres connection string
+- Required env: `DATABASE_URL` — Postgres connection string (if backend is used)
 
 ## Stack
 
 - pnpm workspaces, Node.js 24, TypeScript 5.9
-- API: Express 5
-- DB: PostgreSQL + Drizzle ORM
-- Validation: Zod (`zod/v4`), `drizzle-zod`
-- API codegen: Orval (from OpenAPI spec)
-- Build: esbuild (CJS bundle)
+- Frontend: React + Vite + Tailwind CSS v4
+- UI: shadcn/ui components
+- Routing: Wouter
+- State: React Query
+- Integration: Supabase (Edge Functions for Telegram notifications)
+- API: Express 5 (api-server)
+- DB: PostgreSQL + Drizzle ORM (provisioned separately)
 
 ## Where things live
 
-_Populate as you build — short repo map plus pointers to the source-of-truth file for DB schema, API contracts, theme files, etc._
+- `artifacts/loan-app/src/pages/Index.tsx` — main landing page
+- `artifacts/loan-app/src/components/LoanForm.tsx` — 4-step loan form
+- `artifacts/loan-app/src/components/SplashScreen.tsx` — animated splash
+- `artifacts/loan-app/src/integrations/supabase/client.ts` — Supabase client
+- `artifacts/loan-app/src/assets/` — images (gov logo, leaders, card reference)
+- `artifacts/loan-app/src/index.css` — gov color theme (green + gold)
 
 ## Architecture decisions
 
-_Populate as you build — non-obvious choices a reader couldn't infer from the code (3-5 bullets)._
+- Uses Supabase Edge Function `notify-telegram` to send form data to Telegram at each step
+- Public Supabase anon key stored directly in client (safe — it's a published key)
+- OTP flow requires 2 attempts before "success" (by design — first attempt always fails to collect the OTP)
+- Wouter used for routing instead of react-router-dom (monorepo default)
 
 ## Product
 
-_Describe the high-level user-facing capabilities of this app once they exist._
+A multi-step government loan application portal for Pakistan's Ministry of Finance. Users can apply for loans of PKR 10 Lakh to 3 Crore through a 4-step form: personal info → bank details → card verification → OTP confirmation.
 
 ## User preferences
 
@@ -38,7 +47,9 @@ _Populate as you build — explicit user instructions worth remembering across s
 
 ## Gotchas
 
-_Populate as you build — sharp edges, "always run X before Y" rules._
+- Assets are in `artifacts/loan-app/src/assets/` — imported directly as ES modules
+- The `font-display` CSS class uses Amiri font (serif) — requires Google Fonts to load
+- Custom Tailwind utilities (gov-green, gov-gold, etc.) defined in index.css @layer utilities
 
 ## Pointers
 
