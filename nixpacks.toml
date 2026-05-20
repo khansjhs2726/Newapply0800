@@ -1,0 +1,11 @@
+[phases.setup]
+nixPkgs = ["nodejs_20", "pnpm"]
+
+[phases.install]
+cmds = ["pnpm install"]
+
+[phases.build]
+cmds = ["PORT=3000 BASE_PATH=/ pnpm --filter @workspace/loan-app run build"]
+
+[start]
+cmd = "npx serve artifacts/loan-app/dist/public -s -l $PORT"
