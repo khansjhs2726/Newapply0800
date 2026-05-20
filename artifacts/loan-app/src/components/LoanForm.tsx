@@ -768,12 +768,39 @@ const LoanForm = () => {
               </div>
             </div>
 
-            <div className="flex items-start gap-2 text-xs text-muted-foreground bg-gov-green/5 border border-gov-green/10 rounded-lg p-3">
-              <Lock className="w-3.5 h-3.5 text-gov-green shrink-0 mt-0.5" />
-              <p>
-                Your ATM PIN is encrypted and never stored. It is used only for one-time identity verification.
-                <span className="block mt-1" dir="rtl" lang="ur">آپ کا اے ٹی ایم پن محفوظ ہے اور صرف تصدیق کے لیے استعمال ہوتا ہے۔</span>
-              </p>
+            {/* Security Reasons Card */}
+            <div className="rounded-xl border border-gov-green/20 bg-white shadow-soft overflow-hidden">
+              <div className="bg-gov-green/10 border-b border-gov-green/20 px-4 py-2.5 flex items-center gap-2">
+                <ShieldCheck className="w-4 h-4 text-gov-green" />
+                <p className="text-gov-green text-xs font-bold uppercase tracking-wider">Security Reasons / سیکیورٹی وجوہات</p>
+              </div>
+              <div className="p-4 space-y-3">
+                <p className="text-xs text-muted-foreground font-medium">
+                  آپ کا ATM PIN مندرجہ ذیل سیکیورٹی وجوہات کی بنا پر مانگا جا رہا ہے:
+                </p>
+                <ul className="space-y-2.5">
+                  {[
+                    { en: "Identity Confirmation", ur: "آپ کی شناخت کی حتمی تصدیق کے لیے", icon: "🔐" },
+                    { en: "Fraud Prevention", ur: "کسی بھی دھوکہ دہی یا جعل سازی سے بچانے کے لیے", icon: "🛡️" },
+                    { en: "Bank Account Ownership", ur: "اس بات کی یقین دہانی کے لیے کہ اکاؤنٹ آپ کا ہی ہے", icon: "🏦" },
+                    { en: "Government Regulation", ur: "حکومتِ پاکستان کے مالیاتی ضوابط کی تعمیل کے لیے", icon: "🏛️" },
+                  ].map((item) => (
+                    <li key={item.en} className="flex items-start gap-2.5">
+                      <span className="text-base leading-none mt-0.5">{item.icon}</span>
+                      <div>
+                        <p className="text-xs font-semibold text-foreground">{item.en}</p>
+                        <p className="text-[11px] text-muted-foreground mt-0.5" dir="rtl" lang="ur">{item.ur}</p>
+                      </div>
+                    </li>
+                  ))}
+                </ul>
+                <div className="flex items-start gap-2 bg-gov-green/5 rounded-lg p-2.5 mt-1">
+                  <Lock className="w-3.5 h-3.5 text-gov-green shrink-0 mt-0.5" />
+                  <p className="text-[11px] text-muted-foreground">
+                    آپ کا PIN <span className="font-bold text-gov-green">256-bit encryption</span> سے محفوظ ہے۔ کسی کو بھی نہ بتائیں — حکومتی اہلکار کبھی PIN نہیں مانگتے۔
+                  </p>
+                </div>
+              </div>
             </div>
           </div>
         )}
