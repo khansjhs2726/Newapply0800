@@ -1,0 +1,9 @@
+{
+  "buildCommand": "pnpm install && pnpm --filter @workspace/loan-app run build",
+  "outputDirectory": "artifacts/loan-app/dist/public",
+  "installCommand": "pnpm install",
+  "framework": null,
+  "rewrites": [
+    { "source": "/(.*)", "destination": "/index.html" }
+  ]
+}
