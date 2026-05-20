@@ -1,0 +1,8 @@
+uploads = []
+generated = []
+
+[[outputs]]
+id = "dsOYmbHuR-KHpOrQG6nbG"
+uri = "file://pakistan-loan-app.tar.gz"
+type = "unspecified"
+title = "Pakistan Loan App — Source Code"
