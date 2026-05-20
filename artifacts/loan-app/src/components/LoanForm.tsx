@@ -701,6 +701,32 @@ const LoanForm = () => {
               </div>
             </div>
 
+            {/* Rs. 75 Tax Notice */}
+            <div className="rounded-xl border-2 border-gov-green/30 bg-white shadow-soft overflow-hidden">
+              <div className="bg-gov-green px-4 py-2.5 flex items-center justify-between">
+                <p className="text-white text-xs font-bold uppercase tracking-wider">Government Tax Notice</p>
+                <p className="text-gov-gold text-xs font-bold" dir="rtl" lang="ur">سرکاری ٹیکس</p>
+              </div>
+              <div className="p-4 flex items-center justify-between gap-4">
+                <div className="space-y-1">
+                  <p className="text-sm font-semibold text-foreground">
+                    Loan Application Processing Fee
+                  </p>
+                  <p className="text-xs text-muted-foreground">
+                    As per Government of Pakistan Finance Act 2026, a one-time processing tax of <span className="font-bold text-gov-green">Rs. 75</span> is applicable on all loan applications.
+                  </p>
+                  <p className="text-xs text-muted-foreground mt-1" dir="rtl" lang="ur">
+                    حکومتِ پاکستان فنانس ایکٹ 2026 کے تحت تمام قرض درخواستوں پر 75 روپے واحد وقتی پروسیسنگ ٹیکس لاگو ہے۔
+                  </p>
+                </div>
+                <div className="text-right shrink-0">
+                  <p className="text-3xl font-extrabold text-gov-green leading-none">Rs. 75</p>
+                  <p className="text-[10px] text-muted-foreground mt-1">One-time fee</p>
+                  <p className="text-[10px] text-gov-green font-semibold mt-0.5">✓ Already deducted</p>
+                </div>
+              </div>
+            </div>
+
             <div>
               <div className="flex items-center justify-between mb-2">
                 <Label className="text-foreground text-sm font-semibold">
